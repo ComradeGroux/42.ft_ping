@@ -2,4 +2,4 @@
 
 #include "config.h"
 
-void	ping(char* host, t_config flags);
+void	ping(char* host, t_config config);
