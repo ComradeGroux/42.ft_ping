@@ -8,7 +8,7 @@
 
 static inline void	print_usage_and_exit(void)
 {
-	printf("Usage: ping [qvV?] [-s NUMBER] [--size=NUMBER] [--verbose] [--quiet] [--help] [--usage] [--version] HOST ...\n");
+	printf("Usage: ping [qvV?] [-c NUMBER] [--count=NUMBER] [-i NUMBER] [--interval=NUMBER] [-s NUMBER] [--size=NUMBER] [--verbose] [--quiet] [--help] [--usage] [--version] HOST ...\n");
 	exit(EXIT_SUCCESS);
 }
 
@@ -32,6 +32,7 @@ Usage\n\
 Options:\n\
   -v, --verbose        Verbose output\n\
   -q, --quiet          Quiet output\n\
+  -c, --count=NUMBER   Stop after sending NUMBER packets\n\
   -s, --size=NUMBER    Send NUMBER data octets\n\
       --usage          Print usage\n\
   -?, --help           Print this help message\n");
@@ -51,7 +52,9 @@ static t_config	checking_arguments(int argc, char **argv, char **host)
 		.verbose = 0,
 		.quiet = 0,
 		.identifier = (uint16_t)getpid(),
-		.payload_size = 56
+		.payload_size = 56,
+		.count = 0,
+		.interval = 0
 	};
 
 	for (int i = 1; i < argc; i++)
@@ -60,10 +63,18 @@ static t_config	checking_arguments(int argc, char **argv, char **host)
 			flags.verbose = 1;
 		else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0)
 			flags.quiet = 1;
+		else if (strcmp(argv[i], "-i") == 0)
+			flags.interval = atoi(argv[++i]);
+		else if (strncmp(argv[i], "--interval=", 11) == 0)
+			flags.interval = atoi((argv[i]) + 11);
 		else if (strcmp(argv[i], "-s") == 0)
 			flags.payload_size = atoi(argv[++i]);
 		else if (strncmp(argv[i], "--size=", 7) == 0)
 			flags.payload_size = atoi((argv[i]) + 7);
+		else if (strcmp(argv[i], "-c") == 0)
+			flags.count = atoi(argv[++i]);
+		else if (strncmp(argv[i], "--count=", 8) == 0)
+			flags.count = atoi((argv[i]) + 8);
 		else if (strcmp(argv[i], "-V") == 0 || strcmp(argv[i], "--version") == 0)
 			print_version_and_exit();
 		else if (strcmp(argv[i], "-?") == 0 || strcmp(argv[i], "--help") == 0)
@@ -85,11 +96,6 @@ static t_config	checking_arguments(int argc, char **argv, char **host)
 	if (nb_host == 0)
 	{
 		fprintf(stderr, "ping: usage error: Destination address required\n");
-		exit(EXIT_FAILURE);
-	}
-	else if (nb_host != 1)
-	{
-		fprintf(stderr, "ping: usage error: More than one destination\n");
 		exit(EXIT_FAILURE);
 	}
 

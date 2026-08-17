@@ -1,7 +1,10 @@
-GREENGREEN = \033[38;5;46m
-RED = \033[0;31m
-GREY = \033[38;5;240m
-RESET = \033[0m
+BOLD	:= \033[1m
+GRAY	:= \033[90m
+GREEN	:= \033[32m
+BLUE	:= \033[34m
+RED		:= \033[31m
+RESET	:= \033[0m
+ERASE	:= \r\033[2K
 
 NAME	= ft_ping
 
@@ -17,43 +20,56 @@ SRC_DIR		= src
 BUILD_DIR	= build
 OBJ_DIR		= ${BUILD_DIR}/obj
 
-SRCS_LIST 	=	main.c	\
-				ping.c
+SRCS_LIST 	=	main.c		\
+				ping.c		\
+				icmp.c		\
+				socket.c	\
+				print.c
 
 SRCS	:= ${addprefix ${SRC_DIR}/, ${SRCS_LIST}}
 VPATH	:= $(dir $(SRCS))
 
 OBJS	:= $(addprefix $(OBJ_DIR)/, $(notdir $(SRCS:.c=.o)))
 
-
-${NAME}: ${BUILD_DIR} ${OBJS}
-	@echo "$(RESET)[$(GREENGREEN)${NAME}$(RESET)]: ${NAME} Objects were created${GREY}"
-	${CC} ${CFLAGS} ${OBJS} -o ${NAME}
-	@echo "$(RESET)[$(GREENGREEN)${NAME}$(RESET)]: ${NAME} created !"
-
-${BUILD_DIR}:
-	mkdir -p ${BUILD_DIR}
-	mkdir -p ${OBJ_DIR}
-
 all: ${NAME}
+
+${NAME}: ${OBJ_DIR}/.compile_start ${OBJS}
+	@printf "$(BOLD)Linking $(NAME)$(RESET)\n"
+	@${CC} ${CFLAGS} ${OBJS} -o ${NAME}
+	@printf "$(GREEN)  ✓ $(NAME) ready$(RESET)\n"
+	@printf "$(BOLD)Setting up capabilities (Need to be run as root)$(RESET)\n"
+	@sudo setcap cap_net_raw+ep $(NAME)
+	@printf "$(GREEN)  ✓ capabilities (cap_net_raw + ep) set on $(NAME)$(RESET)\n"
+
+${OBJ_DIR}/.compile_start: | ${OBJ_DIR}
+	@printf "$(BOLD)Compiling $(NAME)$(RESET)\n"
+	@touch $@
+
+
+${OBJ_DIR}:
+	@mkdir -p ${OBJ_DIR}
 
 debug: CFLAGS += ${DEBUG_FLAG}
 debug: re
 
-${OBJ_DIR}%.o:${SRC_DIR}%.c
-	@printf "\033[38;5;240m"
-	${CC} ${CFLAGS} ${LIBFT_INC} -I${INC_DIR} -o $@ -c $<
+${OBJ_DIR}/%.o: ${SRC_DIR}/%.c | ${OBJ_DIR}/.compile_start
+	@printf "$(GRAY)  $<...$(RESET)" && \
+	 ${CC} ${CFLAGS} -I${INC_DIR} -o $@ -c $< && \
+	 printf "$(ERASE)$(GREEN)  ✓ $<$(RESET)\n"
 
 clean:
-	@echo "[$(RED)${NAME}$(RESET)]: Cleaning ${NAME} Objects...${GREY}"
-	${RM} ${OBJ_DIR}
-	@echo "[$(RED)${NAME}$(RESET)]: ${NAME} Objects were cleaned${GREY}"
+	@printf "$(BOLD)$(BLUE)Cleaning $(NAME) objects...$(RESET)\n"
+	@printf "$(GRAY)  Removing build objects...$(RESET)" && \
+	 ${RM} ${OBJ_DIR} && \
+	 printf "$(ERASE)"
+	@printf "$(GREEN)  ✓ $(NAME) objects cleaned$(RESET)\n"
 
 fclean: clean
-	@echo "${RESET}[$(RED)${NAME}$(RESET)]: Cleaning ${NAME}...${GREY}"
-	${RM} ${NAME}
-	${RM} ${BUILD_DIR}
-	@echo "${RESET}[$(RED)${NAME}$(RESET)]: ${NAME} was cleaned"
+	@printf "$(BOLD)$(BLUE)Cleaning $(NAME)...$(RESET)\n"
+	@printf "$(GRAY)  Removing $(NAME)...$(RESET)" && \
+	 ${RM} ${NAME} && \
+	 printf "$(ERASE)"
+	@printf "$(GREEN)  ✓ $(NAME) cleaned$(RESET)\n"
 
 re: fclean all
 
