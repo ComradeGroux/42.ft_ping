@@ -36,9 +36,10 @@ all: ${NAME}
 
 ${NAME}: ${OBJ_DIR}/.compile_start ${OBJS}
 	@printf "$(BOLD)Linking $(NAME)$(RESET)\n"
-	@${CC} ${CFLAGS} ${OBJS} -o ${NAME}
+	@${CC} ${CFLAGS} ${OBJS} -o ${NAME} -lm
 	@printf "$(GREEN)  ✓ $(NAME) ready$(RESET)\n"
 	@printf "$(BOLD)Setting up capabilities (Need to be run as root)$(RESET)\n"
+	@echo "sudo setcap ca_net_raw+ep"
 	@sudo setcap cap_net_raw+ep $(NAME)
 	@printf "$(GREEN)  ✓ capabilities (cap_net_raw + ep) set on $(NAME)$(RESET)\n"
 

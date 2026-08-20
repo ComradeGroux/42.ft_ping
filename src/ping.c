@@ -1,23 +1,22 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdint.h>
 #include <string.h>
 #include <signal.h>
-#include <arpa/inet.h>
 #include <netinet/ip_icmp.h>
-#include <time.h>
-#include <unistd.h>
 
 #include "ping.h"
 #include "socket.h"
 #include "print.h"
 
-static volatile sig_atomic_t keepRunning = 1;
+static volatile sig_atomic_t	keepRunning = 1;
+static sig_atomic_t	sendPacket = 1;
 
-static void sigHandler(int _)
+static void sigHandler(int signum)
 {
-	(void)_;
-	keepRunning = 0;
+	if (signum == SIGALRM)
+		sendPacket = 1;
+	else if (signum == SIGINT)
+		keepRunning = 0;
 }
 
 static void	init_signal(void)
@@ -25,14 +24,7 @@ static void	init_signal(void)
 	struct sigaction act = { 0 };
 	act.sa_handler = sigHandler;
 	sigaction(SIGINT, &act, NULL);
-}
-
-static double	get_elapsed_time(struct timespec start)
-{
-	struct timespec	end;
-	clock_gettime(CLOCK_MONOTONIC, &end);
-
-	return (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_nsec - start.tv_nsec) / 1e6;
+	sigaction(SIGALRM, &act, NULL);
 }
 
 void	ping(char *host, t_config config)
@@ -40,41 +32,44 @@ void	ping(char *host, t_config config)
 	init_signal();
 	t_sock	s = create_socket(host, config);
 
-	printf("IP: %s\n", s.ip_str);
-
-	uint8_t	*buffer = malloc(sizeof(struct icmphdr) + config.payload_size);
-	if (!buffer)
+	uint8_t	*request = malloc(sizeof(struct icmphdr) + config.payload_size);
+	if (!request)
 	{
+		close(s.socket);
 		fprintf(stderr, "ping: malloc error: Malloc failed\n");
 		exit(EXIT_FAILURE);
 	}
-	memset(buffer, 0, sizeof(struct icmphdr) + config.payload_size);
+	memset(request, 0, sizeof(struct icmphdr) + config.payload_size);
+
+	uint8_t	*response = malloc(sizeof(struct iphdr) + sizeof(struct icmphdr) + config.payload_size);
+	if (response == NULL)
+	{
+		free(request);
+		close(s.socket);
+		fprintf(stderr, "ping: malloc error: Malloc failed\n");
+		exit(EXIT_FAILURE);
+	}
 
 	size_t	count = config.count == 0 ? -1 : config.count;
-	struct timespec	start;
+	size_t	interval = config.interval == 0 ? 1 : config.interval;
+	t_stats	stats;
+	memset(&stats, 0, sizeof(stats));
+	print_header(host, s.ip_str, config);
 	while (keepRunning && count != 0)
 	{
-		if (config.interval != 0)
-			clock_gettime(CLOCK_MONOTONIC, &start);
-		count--;
-
-		if (config.quiet == 0)
-			printf("We should keep running this thing: %s\n", host);
-
-
-
-
-
-
-		double	remaining_time_ms = (config.interval * 1000.0) - get_elapsed_time(start);
-		if (config.interval != 0 && remaining_time_ms > 0)
+		if (sendPacket)
 		{
-			start.tv_sec  = (long)(remaining_time_ms / 1000.0);
-			start.tv_nsec = (long)((remaining_time_ms - start.tv_sec * 1000.0) * 1e6);
-			nanosleep(&start, NULL);
+			sendPacket = 0;
+			alarm(interval);
+			send_request(request, s, config, &stats);
 		}
-	}
-	free(buffer);
 
-	// PRINT RESULTS
+		if (receive_response(response, s, config, &stats) > 0)
+			count--;
+	}
+	free(request);
+	free(response);
+	close(s.socket);
+
+	print_stats(host, stats);
 }

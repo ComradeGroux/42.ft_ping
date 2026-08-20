@@ -1,7 +1,4 @@
-
-#include <stdint.h>
 #include <string.h>
-#include <stdio.h>
 #include <netinet/ip_icmp.h>
 #include <time.h>
 
@@ -32,7 +29,7 @@ static uint16_t	compute_checksum(const void *data, size_t len) {
 	return (uint16_t)(~sum);
 }
 
-static int	verify_checksum(const void *data, size_t len)
+int	verify_checksum(const void *data, size_t len)
 {
 	uint16_t to_compute[len];
 	if (len != 0)
@@ -44,10 +41,8 @@ static int	verify_checksum(const void *data, size_t len)
 	return (compute_checksum(to_compute, len) == extract_checksum(data));
 }
 
-int	build_icmp_request(uint8_t *data, t_config config)
+void	build_icmp_request(uint8_t *data, t_config config)
 {
-	(void)verify_checksum(NULL, 0);
-
 	static size_t packet_num = 0;
 
 	struct icmphdr *header = (struct icmphdr*)data;
@@ -59,7 +54,7 @@ int	build_icmp_request(uint8_t *data, t_config config)
 
 	uint8_t	*payload = data + sizeof(header);
 	memset(payload, 0, config.payload_size);
-	
+
 	struct timespec now;
 	if (config.payload_size >= sizeof(now))
 	{
@@ -70,5 +65,4 @@ int	build_icmp_request(uint8_t *data, t_config config)
 	header->checksum = compute_checksum(data, sizeof(struct icmphdr) + config.payload_size);
 
 	packet_num++;
-	return 0;
 }

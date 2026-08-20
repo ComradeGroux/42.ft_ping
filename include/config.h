@@ -1,5 +1,6 @@
 #pragma once
 
+#include <unistd.h>
 #include <stdint.h>
 
 typedef struct s_config {
