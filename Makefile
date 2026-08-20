@@ -24,7 +24,8 @@ SRCS_LIST 	=	main.c		\
 				ping.c		\
 				icmp.c		\
 				socket.c	\
-				print.c
+				print.c		\
+				check.c
 
 SRCS	:= ${addprefix ${SRC_DIR}/, ${SRCS_LIST}}
 VPATH	:= $(dir $(SRCS))
