@@ -70,7 +70,7 @@ static inline long	str2int(char *str)
 	return res;
 }
 
-static inline uint8_t	checking_for_int(char *option, char *arg)
+static inline ssize_t	checking_for_int(char *option, char *arg)
 {
 	if (arg[0] == '\0')
 		print_no_argument_and_exit(option);
@@ -111,7 +111,7 @@ t_config	checking_arguments(int argc, char **argv, char **host)
 		}
 		else if (strncmp(argv[i], "--interval=", 11) == 0)
 			flags.interval = checking_for_int(argv[i], (argv[i]) + 11);
-		else if (strncmp(argv[i], "--interval", 10) == 0)
+		else if (strcmp(argv[i], "--interval") == 0)
 		{
 			int	j = i;
 			if (argv[++i] == NULL)
@@ -127,7 +127,7 @@ t_config	checking_arguments(int argc, char **argv, char **host)
 		}
 		else if (strncmp(argv[i], "--size=", 7) == 0)
 			flags.payload_size = checking_for_int(argv[i], (argv[i]) + 7);
-		else if (strncmp(argv[i], "--size", 6) == 0)
+		else if (strcmp(argv[i], "--size") == 0)
 		{
 			int	j = i;
 			if (argv[++i] == NULL)
@@ -143,7 +143,7 @@ t_config	checking_arguments(int argc, char **argv, char **host)
 		}
 		else if (strncmp(argv[i], "--count=", 8) == 0)
 			flags.count = checking_for_int(argv[i], (argv[i]) + 8);
-		else if (strncmp(argv[i], "--count", 7) == 0)
+		else if (strcmp(argv[i], "--count") == 0)
 		{
 			int	j = i;
 			if (argv[++i] == NULL)
@@ -173,6 +173,8 @@ t_config	checking_arguments(int argc, char **argv, char **host)
 		fprintf(stderr, "ping: usage error: Destination address required\n");
 		exit(EXIT_FAILURE);
 	}
+	else if (nb_host > 1)
+		printf("ping: usage warning: Multiple destination address isn't implemented. Will use the last one.\n\n");
 
 	return flags;
 }

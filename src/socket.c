@@ -107,9 +107,9 @@ static double	get_elapsed_time(struct timespec start)
 
 int		receive_response(uint8_t *buffer, t_sock s, t_config config, t_stats *stats)
 {
-	struct sockaddr	src;
-	socklen_t		src_len = sizeof(src);
-	ssize_t	n = recvfrom(s.socket, buffer, (sizeof(struct iphdr) + sizeof(struct icmphdr) + config.payload_size), 0, &src, &src_len);
+	struct sockaddr_in	src;
+	socklen_t			src_len = sizeof(src);
+	ssize_t	n = recvfrom(s.socket, buffer, (sizeof(struct iphdr) + sizeof(struct icmphdr) + config.payload_size), 0, (struct sockaddr*)&src, &src_len);
 
 	if (n == -1)
 	{
@@ -127,6 +127,14 @@ int		receive_response(uint8_t *buffer, t_sock s, t_config config, t_stats *stats
 		exit(EXIT_FAILURE);
 	}
 	struct icmphdr	*icmp = skip_ip_header(buffer);
+
+	if (icmp->type != ICMP_ECHOREPLY)
+	{
+		if (!config.quiet)
+			print_icmp_error(icmp, n - sizeof(struct iphdr), &src, config);
+		return 0;
+	}
+
 	if (icmp->un.echo.id != ntohs((config.identifier & 0xFFFF)))
 		return 0;
 
@@ -147,7 +155,7 @@ int		receive_response(uint8_t *buffer, t_sock s, t_config config, t_stats *stats
 
 		if (rtt < stats->min || stats->received == 0)
 			stats->min = rtt;
-		else if (rtt > stats->max)
+		if (rtt > stats->max || stats->received == 0)
 			stats->max = rtt;
 
 		stats->sum += rtt;
