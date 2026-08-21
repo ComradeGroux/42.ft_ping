@@ -142,7 +142,7 @@ t_config	checking_arguments(int argc, char **argv, char **host)
 			flags.count = checking_for_int(argv[j], argv[i]);
 		}
 		else if (strncmp(argv[i], "--count=", 8) == 0)
-			flags.count = atoi((argv[i]) + 8);
+			flags.count = checking_for_int(argv[i], (argv[i]) + 8);
 		else if (strncmp(argv[i], "--count", 7) == 0)
 		{
 			int	j = i;
