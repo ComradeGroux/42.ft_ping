@@ -26,13 +26,13 @@ static void	resolve_hostname(char* hostname, t_sock* s)
 	int err = getaddrinfo(hostname, NULL, &hints, &res);
 	if (err != 0)
 	{
-		fprintf(stderr, "ping error: getaddrinfo error: %s\n", gai_strerror(err));
+		fprintf(stderr, "ft_ping error: getaddrinfo error: %s\n", gai_strerror(err));
 		exit(EXIT_FAILURE);
 	}
 
 	if (res == NULL)
 	{
-		fprintf(stderr, "ping error: server error: Host unreachable\n");
+		fprintf(stderr, "ft_ping error: server error: Host unreachable\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -41,7 +41,7 @@ static void	resolve_hostname(char* hostname, t_sock* s)
 
 	if (inet_ntop(AF_INET, &(s->addr.sin_addr), s->ip_str, INET_ADDRSTRLEN) == NULL)
 	{
-		perror("ping: inet_ntop error");
+		perror("ft_ping: inet_ntop error");
 		exit(EXIT_FAILURE);
 	}
 }
@@ -55,7 +55,7 @@ t_sock	create_socket(char *hostname, t_config config)
 	s.socket = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if (s.socket == -1)
 	{
-		perror("ping: socket error");
+		perror("ft_ping: socket error");
 		exit(EXIT_FAILURE);
 	}
 
@@ -67,7 +67,7 @@ t_sock	create_socket(char *hostname, t_config config)
 	if (setsockopt(s.socket, SOL_SOCKET, SO_RCVTIMEO, &tv_out, sizeof(tv_out)) < 0)
 	{
 		close(s.socket);
-		perror("ping: socket error");
+		perror("ft_ping: socket error");
 		exit(EXIT_FAILURE);
 	}
 
@@ -80,7 +80,7 @@ void	send_request(uint8_t *buffer, t_sock s, t_config config, t_stats *stats)
 	if (sendto(s.socket, buffer, (sizeof(struct icmphdr) + config.payload_size), 0, (struct sockaddr *)&(s.addr), sizeof(s.addr)) == -1)
 	{
 		close(s.socket);
-		perror("ping: send error");
+		perror("ft_ping: send error");
 		exit(EXIT_FAILURE);
 	}
 	stats->transmitted++;
@@ -123,13 +123,13 @@ int		receive_response(uint8_t *buffer, t_sock s, t_config config, t_stats *stats
 				;
 		}
 		close(s.socket);
-		perror("ping: recvfrom error");
+		perror("ft_ping: recvfrom error");
 		exit(EXIT_FAILURE);
 	}
 	else if (n <= (ssize_t)sizeof(struct icmphdr))
 	{
 		close(s.socket);
-		perror("ping: recvfrom error");
+		perror("ft_ping: recvfrom error");
 		exit(EXIT_FAILURE);
 	}
 
@@ -147,7 +147,7 @@ int		receive_response(uint8_t *buffer, t_sock s, t_config config, t_stats *stats
 	if (!verify_checksum(icmp, n - sizeof(struct iphdr)))
 	{
 		if (config.verbose)
-			fprintf(stderr, "ping: warning: corrupted packet received (bad checksum)\n");
+			fprintf(stderr, "ft_ping: warning: corrupted packet received (bad checksum)\n");
 		return -1;
 	}
 

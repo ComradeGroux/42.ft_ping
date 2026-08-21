@@ -36,7 +36,7 @@ void	ping(char *host, t_config config)
 	if (!request)
 	{
 		close(s.socket);
-		fprintf(stderr, "ping: malloc error: Malloc failed\n");
+		fprintf(stderr, "ft_ping: malloc error: Malloc failed\n");
 		exit(EXIT_FAILURE);
 	}
 	memset(request, 0, sizeof(struct icmphdr) + config.payload_size);
@@ -46,7 +46,7 @@ void	ping(char *host, t_config config)
 	{
 		free(request);
 		close(s.socket);
-		fprintf(stderr, "ping: malloc error: Malloc failed\n");
+		fprintf(stderr, "ft_ping: malloc error: Malloc failed\n");
 		exit(EXIT_FAILURE);
 	}
 

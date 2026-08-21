@@ -11,13 +11,13 @@
 
 static inline void	print_usage_and_exit(void)
 {
-	printf("Usage: ping [qvV?] [-c NUMBER] [--count=NUMBER] [-i NUMBER] [--interval=NUMBER] [-s NUMBER] [--size=NUMBER] [--verbose] [--quiet] [--help] [--usage] [--version] HOST ...\n");
+	printf("Usage: ft_ping [qvV?] [-c NUMBER] [--count=NUMBER] [-i NUMBER] [--interval=NUMBER] [-s NUMBER] [--size=NUMBER] [--verbose] [--quiet] [--help] [--usage] [--version] HOST ...\n");
 	exit(EXIT_SUCCESS);
 }
 
 static inline void	print_version_and_exit(void)
 {
-	printf("ping (GNU inetutils reimplementation) 2.5\n\
+	printf("ft_ping (GNU inetutils reimplementation) 2.5\n\
 License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.\n\
 This is free software: you are free to change and redistribute it.\n\
 There is NO WARRANTY, to the extent permitted by law.\n\
@@ -30,7 +30,7 @@ static inline void	print_help_and_exit(int exit_code)
 {
 	printf("\
 Usage\n\
-  ping [OPTIONS...] HOST ...\n\
+  ft_ping [OPTIONS...] HOST ...\n\
 \n\
 Options:\n\
   -v, --verbose        Verbose output\n\
@@ -45,14 +45,14 @@ Options:\n\
 
 static inline void	print_invalid_and_exit(char* arg, char *err)
 {
-	fprintf(stderr, "ping: invalid value (`%s' near `%s')\n", arg, err);
+	fprintf(stderr, "ft_ping: invalid value (`%s' near `%s')\n", arg, err);
 	printf("Try 'ping --help' or 'ping --usage' for more information.\n");
 	exit(EXIT_FAILURE);
 }
 
 static inline void	print_no_argument_and_exit(char *option)
 {
-	fprintf(stderr, "ping: option '%s' requires an argument\n", option);
+	fprintf(stderr, "ft_ping: option '%s' requires an argument\n", option);
 	printf("Try 'ping --help' or 'ping --usage' for more information.\n");
 	exit(EXIT_FAILURE);
 }
@@ -67,7 +67,7 @@ static inline long	str2int(char *str)
 		print_invalid_and_exit(str, err);
 	else if (res < 0)
 	{
-		fprintf(stderr, "ping: option value too big: %ld\n", res);
+		fprintf(stderr, "ft_ping: option value too big: %ld\n", res);
 		exit(EXIT_FAILURE);
 	}
 
@@ -86,7 +86,7 @@ t_config	checking_arguments(int argc, char **argv, char **host)
 {
 	if (argc == 1)
 	{
-		fprintf(stderr, "ping: usage error: Destination address required\n");
+		fprintf(stderr, "ft_ping: usage error: Destination address required\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -162,7 +162,7 @@ t_config	checking_arguments(int argc, char **argv, char **host)
 			print_usage_and_exit();
 		else if (strncmp(argv[i], "-", 1) == 0)
 		{
-			fprintf(stderr, "ping: invalid option: %s is not supported\n\n", argv[i]);
+			fprintf(stderr, "ft_ping: invalid option: %s is not supported\n\n", argv[i]);
 			print_help_and_exit(EXIT_FAILURE);
 		}
 		else
@@ -174,17 +174,17 @@ t_config	checking_arguments(int argc, char **argv, char **host)
 
 	if (flags.payload_size > IP_MAXPACKET - MAXIPLEN - MAXICMPLEN)
 	{
-		fprintf(stderr, "ping: size value too big: %ld (max %d bytes)\n", flags.payload_size, IP_MAXPACKET - MAXIPLEN - MAXICMPLEN);
+		fprintf(stderr, "ft_ping: size value too big: %ld (max %d bytes)\n", flags.payload_size, IP_MAXPACKET - MAXIPLEN - MAXICMPLEN);
 		exit(EXIT_FAILURE);
 	}
 
 	if (nb_host == 0)
 	{
-		fprintf(stderr, "ping: usage error: Destination address required\n");
+		fprintf(stderr, "ft_ping: usage error: Destination address required\n");
 		exit(EXIT_FAILURE);
 	}
 	else if (nb_host > 1)
-		printf("ping: usage warning: Multiple destination address isn't implemented. Will use the last one.\n\n");
+		printf("ft_ping: usage warning: Multiple destination address isn't implemented. Will use the last one.\n\n");
 
 	return flags;
 }

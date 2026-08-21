@@ -62,7 +62,7 @@ ${OBJ_DIR}/%.o: ${SRC_DIR}/%.c | ${OBJ_DIR}/.compile_start
 clean:
 	@printf "$(BOLD)$(BLUE)Cleaning $(NAME) objects...$(RESET)\n"
 	@printf "$(GRAY)  Removing build objects...$(RESET)" && \
-	 ${RM} ${OBJ_DIR} && \
+	 ${RM} ${BUILD_DIR} && \
 	 printf "$(ERASE)"
 	@printf "$(GREEN)  ✓ $(NAME) objects cleaned$(RESET)\n"
 
