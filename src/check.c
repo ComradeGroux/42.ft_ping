@@ -48,7 +48,7 @@ static inline void	print_invalid_and_exit(char* arg, char *err)
 
 static inline void	print_no_argument_and_exit(char *option)
 {
-	fprintf(stderr, "ping: option requires an argument -- '%s'\n", option);
+	fprintf(stderr, "ping: option '%s' requires an argument\n", option);
 	printf("Try 'ping --help' or 'ping --usage' for more information.\n");
 	exit(EXIT_FAILURE);
 }
@@ -104,39 +104,51 @@ t_config	checking_arguments(int argc, char **argv, char **host)
 			flags.quiet = 1;
 		else if (strcmp(argv[i], "-i") == 0)
 		{
-			int	j = i; 
-			flags.interval = checking_for_int(argv[j], argv[++i]);
+			int	j = i;
+			if (argv[++i] == NULL)
+				print_no_argument_and_exit("-i");
+			flags.interval = checking_for_int(argv[j], argv[i]);
 		}
 		else if (strncmp(argv[i], "--interval=", 11) == 0)
 			flags.interval = checking_for_int(argv[i], (argv[i]) + 11);
 		else if (strncmp(argv[i], "--interval", 10) == 0)
 		{
-			int	j = i; 
-			flags.interval = checking_for_int(argv[j], argv[++i]);
+			int	j = i;
+			if (argv[++i] == NULL)
+				print_no_argument_and_exit("--interval");
+			flags.interval = checking_for_int(argv[j], argv[i]);
 		}
 		else if (strcmp(argv[i], "-s") == 0)
 		{
 			int	j = i;
-			flags.payload_size = checking_for_int(argv[j], argv[++i]);
+			if (argv[++i] == NULL)
+				print_no_argument_and_exit("-s");
+			flags.payload_size = checking_for_int(argv[j], argv[i]);
 		}
 		else if (strncmp(argv[i], "--size=", 7) == 0)
 			flags.payload_size = checking_for_int(argv[i], (argv[i]) + 7);
 		else if (strncmp(argv[i], "--size", 6) == 0)
 		{
 			int	j = i;
-			flags.payload_size = checking_for_int(argv[j], argv[++i]);
+			if (argv[++i] == NULL)
+				print_no_argument_and_exit("--size");
+			flags.payload_size = checking_for_int(argv[j], argv[i]);
 		}
 		else if (strcmp(argv[i], "-c") == 0)
 		{
 			int	j = i;
-			flags.count = checking_for_int(argv[j], argv[++i]);
+			if (argv[++i] == NULL)
+				print_no_argument_and_exit("-c");
+			flags.count = checking_for_int(argv[j], argv[i]);
 		}
 		else if (strncmp(argv[i], "--count=", 8) == 0)
 			flags.count = atoi((argv[i]) + 8);
 		else if (strncmp(argv[i], "--count", 7) == 0)
 		{
 			int	j = i;
-			flags.count = checking_for_int(argv[j], argv[++i]);
+			if (argv[++i] == NULL)
+				print_no_argument_and_exit("--count");
+			flags.count = checking_for_int(argv[j], argv[i]);
 		}
 		else if (strcmp(argv[i], "-V") == 0 || strcmp(argv[i], "--version") == 0)
 			print_version_and_exit();
