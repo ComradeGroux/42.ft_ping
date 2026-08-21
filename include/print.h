@@ -1,7 +1,5 @@
 #pragma once
 
-#include <sys/socket.h>
-
 #include "config.h"
 #include "stats.h"
 

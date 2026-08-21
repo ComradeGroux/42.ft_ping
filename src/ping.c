@@ -9,7 +9,7 @@
 #include "print.h"
 
 static volatile sig_atomic_t	keepRunning = 1;
-static sig_atomic_t	sendPacket = 1;
+static volatile sig_atomic_t	sendPacket = 1;
 
 static void sigHandler(int signum)
 {
