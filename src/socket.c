@@ -126,16 +126,22 @@ int		receive_response(uint8_t *buffer, t_sock s, t_config config, t_stats *stats
 		perror("ping: recvfrom error");
 		exit(EXIT_FAILURE);
 	}
-	struct icmphdr	*icmp = skip_ip_header(buffer);
+	else if (n <= (ssize_t)sizeof(struct icmphdr))
+	{
+		close(s.socket);
+		perror("ping: recvfrom error");
+		exit(EXIT_FAILURE);
+	}
 
-	if (icmp->type != ICMP_ECHOREPLY)
+	struct icmphdr	*icmp = skip_ip_header(buffer);
+	if (icmp->type != ICMP_ECHOREPLY && icmp->type != ICMP_ECHO)
 	{
 		if (!config.quiet)
 			print_icmp_error(icmp, n - sizeof(struct iphdr), &src, config);
 		return 0;
 	}
 
-	if (icmp->un.echo.id != ntohs((config.identifier & 0xFFFF)))
+	if (icmp->un.echo.id != ntohs((config.identifier & 0xFFFF)) || icmp->type == ICMP_ECHO)
 		return 0;
 
 	if (!verify_checksum(icmp, n - sizeof(struct iphdr)))

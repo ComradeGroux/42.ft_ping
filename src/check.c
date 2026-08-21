@@ -4,6 +4,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
+#include <netinet/ip.h>
+
+#define MAXIPLEN 60
+#define MAXICMPLEN 76
 
 static inline void	print_usage_and_exit(void)
 {
@@ -166,6 +170,12 @@ t_config	checking_arguments(int argc, char **argv, char **host)
 			*host = argv[i];
 			nb_host++;
 		}
+	}
+
+	if (flags.payload_size > IP_MAXPACKET - MAXIPLEN - MAXICMPLEN)
+	{
+		fprintf(stderr, "ping: size value too big: %ld (max %d bytes)\n", flags.payload_size, IP_MAXPACKET - MAXIPLEN - MAXICMPLEN);
+		exit(EXIT_FAILURE);
 	}
 
 	if (nb_host == 0)
